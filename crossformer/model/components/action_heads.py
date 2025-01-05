@@ -220,3 +220,20 @@ class ContinuousActionHead(nn.Module, ActionHead):
 
 class L1ActionHead(ContinuousActionHead):
     loss_type: str = "l1"
+
+
+class NewRobotActionHead(ContinuousActionHead):
+    """Custom action head for your robot"""
+    
+    def __call__(self, transformer_outputs: Dict[str, TokenGroup], train: bool = True):
+        # Get embeddings using parent class
+        mean = super().__call__(transformer_outputs, train=train)
+        
+        # Add any custom processing for your robot's actions
+        processed_actions = self._process_actions(mean)
+        
+        return processed_actions
+        
+    def _process_actions(self, actions):
+        # Add any custom processing needed for your robot's actions
+        return actions

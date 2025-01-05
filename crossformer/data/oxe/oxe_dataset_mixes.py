@@ -35,6 +35,7 @@ CROSS_EMBODIMENT_TARGET = [
     ("droid_wipe", 0.1),
     ("droid_flip_pot_upright", 0.1),
     ("omnimimic_gnm_dataset", 0.2),
+    ("my_new_robot", 0.2),
 ]
 
 CROSS_EMBODIMENT = [

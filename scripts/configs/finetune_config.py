@@ -22,49 +22,32 @@ def get_config():
 
     # fill this in to configure data loading for your dataset.
     FINETUNING_KWARGS = dict(
-        name="bridge_dataset",
-        data_dir="",
-        image_obs_keys={"primary": "image_0"},
-        proprio_obs_keys={},
-        language_key="language_instruction",
+        name="my_new_robot",
+        data_dir="path/to/data",
+        image_obs_keys={"primary": "main_camera", "wrist": "wrist_camera"},
+        proprio_obs_keys={"kinematics": "robot_state"},
         action_proprio_normalization_type="normal",
-        # We want to avoid normalizing the gripper
-        action_normalization_mask=[True, True, True, True, True, True, False],
-        # standardize_fn is dynamically loaded from a file
-        standardize_fn=ModuleSpec.create(
-            "crossformer.data.oxe.oxe_standardization_transforms:bridge_dataset_transform",
-        ),
-        # If the default data loading speed is too slow, try these:
-        # "num_parallel_reads": 8,  # for reading from disk / GCS
-        # "num_parallel_calls": 16,  # for initial dataset construction
+        action_normalization_mask=[True] * your_action_dim,
     )
 
     # an example of how to add a new observation tokenizer and action head
     UPDATE_CONFIG = dict(
         model=dict(
             observation_tokenizers=dict(
-                new_primary=ModuleSpec.create(
-                    ImageTokenizer,
-                    obs_stack_keys=["image_primary"],
-                    task_stack_keys=["image_primary"],
-                    task_film_keys=["language_instruction"],
-                    encoder=ModuleSpec.create(ResNet26FILM),
+                new_robot_state=ModuleSpec.create(
+                    NewRobotTokenizer,
+                    obs_keys=["kinematics"],
                 )
             ),
             heads=dict(
-                new_single_arm=ModuleSpec.create(
-                    L1ActionHead,
+                new_robot=ModuleSpec.create(
+                    NewRobotActionHead,
                     action_horizon=4,
-                    action_dim=7,
-                    num_preds=7,
-                    pool_strategy="pass",
-                    readout_key="readout_new_single_arm",
-                    clip_pred=False,
-                    loss_weight=1.0,
-                    constrain_loss_dims=True,
-                ),
+                    action_dim=your_action_dim,
+                    readout_key="readout_new_robot",
+                )
             ),
-            readouts=dict(new_single_arm=4),
+            readouts=dict(new_robot=4),
         )
     )
 

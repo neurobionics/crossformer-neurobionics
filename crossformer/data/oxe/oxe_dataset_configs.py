@@ -28,6 +28,7 @@ class ProprioEncoding(IntEnum):
     JOINT_BIMANUAL = 4  # 2 x [6 x joint angles + gripper open/close]
     POS_NAV = 5  # XY + yaw
     QUADRUPED = 6
+    NEW_ROBOT = 7  # Add your new robot type
 
 
 class ActionEncoding(IntEnum):
@@ -41,6 +42,7 @@ class ActionEncoding(IntEnum):
         5  # 2 x [6 x joint pos + gripper] + linear base vel + angular base vel
     )
     QUADRUPED = 6
+    NEW_ROBOT_ACTIONS = 7  # Add your new action type
 
 
 OXE_DATASET_CONFIGS = {
@@ -912,5 +914,27 @@ OXE_DATASET_CONFIGS = {
         "proprio_obs_dims": {"bimanual": 14, "quadruped": 46},
         "proprio_encoding": ProprioEncoding.POS_EULER,
         "action_encoding": ActionEncoding.EEF_POS,
+    },
+    "my_new_robot": {
+        "image_obs_keys": {
+            "primary": "main_camera",
+            "high": None,
+            "nav": None,
+            "left_wrist": "wrist_camera",
+            "right_wrist": None,
+        },
+        "depth_obs_keys": {"primary": None, "secondary": None, "wrist": None},
+        "proprio_obs_keys": {
+            "kinematics": "robot_state",
+            "bimanual": None, 
+            "quadruped": None
+        },
+        "proprio_obs_dims": {
+            "kinematics": 12,
+            "bimanual": 14, 
+            "quadruped": 46
+        },
+        "proprio_encoding": ProprioEncoding.NEW_ROBOT,
+        "action_encoding": ActionEncoding.NEW_ROBOT_ACTIONS,
     },
 }

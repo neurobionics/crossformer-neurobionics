@@ -323,3 +323,24 @@ class LowdimObsTokenizer(BinTokenizer):
             tokens = tokenizer_inputs[..., None]
         mask = jnp.ones(tokens.shape[:-1])
         return TokenGroup(tokens, mask)
+
+
+class NewRobotTokenizer(LowdimObsTokenizer):
+    """Custom tokenizer for your robot's state"""
+    
+    def __call__(self, observations, tasks, train: bool = True):
+        # Extract kinematics data
+        tokenizer_inputs = []
+        for key in self.obs_keys:
+            if key in observations:
+                # Add any custom processing for your robot's state
+                robot_state = observations[key]
+                processed_state = self._process_kinematics(robot_state)
+                tokenizer_inputs.append(processed_state)
+                
+        # Use parent class processing
+        return super().__call__(observations, tasks, train=train)
+        
+    def _process_kinematics(self, state):
+        # Add any custom processing needed for your robot's state
+        return state
