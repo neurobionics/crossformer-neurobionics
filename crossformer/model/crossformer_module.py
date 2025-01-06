@@ -113,6 +113,39 @@ class CrossFormerTransformer(nn.Module):
 
         Note: Horizon can be anything <= max_horizon.
         """
+        logging.info("CrossFormerTransformer processing:")
+        logging.info(f"Input timestep_pad_mask shape: {timestep_pad_mask.shape}")
+        
+        # Log observation shapes
+        logging.info("Observation shapes:")
+        for key, value in observations.items():
+            if hasattr(value, 'shape'):
+                logging.info(f"  {key}: {value.shape}")
+        
+        # Log task shapes  
+        logging.info("Task shapes:")
+        for key, value in tasks.items():
+            if hasattr(value, 'shape'):
+                logging.info(f"  {key}: {value.shape}")
+
+        # Track tokenizer outputs
+        for name, tok in self.task_tokenizers.items():
+            tokenizer_output = tok(observations, tasks, train=train)
+            if tokenizer_output is not None:
+                logging.info(f"Task tokenizer {name} output shape: {tokenizer_output.tokens.shape}")
+
+        for name, tok in self.observation_tokenizers.items():
+            tokenizer_output = tok(observations, tasks, train=train)
+            if tokenizer_output is not None:
+                logging.info(f"Obs tokenizer {name} output shape: {tokenizer_output.tokens.shape}")
+
+        # Log final sequence info
+        logging.info("Final sequence details:")
+        for group in all_prefix_groups:
+            logging.info(f"  Prefix group {group.name}: {group.tokens.shape}")
+        for group in all_timestep_groups:
+            logging.info(f"  Timestep group {group.name}: {group.tokens.shape}")
+
         if readouts is None:
             readouts = list(self.readouts.keys())
 
@@ -263,7 +296,7 @@ class CrossFormerTransformer(nn.Module):
                 "task_*": AttentionRule.CAUSAL,
                 "obs_*": AttentionRule.CAUSAL,
                 group_name: AttentionRule.CAUSAL,
-            }  # Attend to tasks, all previous observations, and *only it's own own readout*
+            }  #Attend to tasks, all previous observations, and *only it's own own readout*
 
             all_timestep_groups.append(
                 TimestepGroup(

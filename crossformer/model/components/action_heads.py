@@ -226,14 +226,31 @@ class NewRobotActionHead(ContinuousActionHead):
     """Custom action head for your robot"""
     
     def __call__(self, transformer_outputs: Dict[str, TokenGroup], train: bool = True):
-        # Get embeddings using parent class
-        mean = super().__call__(transformer_outputs, train=train)
+        logging.info("NewRobotActionHead processing:")
+        for key, value in transformer_outputs.items():
+            logging.info(f"  {key} token shape: {value.tokens.shape}")
+            logging.info(f"  {key} mask shape: {value.mask.shape}")
         
-        # Add any custom processing for your robot's actions
+        mean = super().__call__(transformer_outputs, train=train)
+        logging.info(f"Base action head output shape: {mean.shape}")
+        
         processed_actions = self._process_actions(mean)
+        logging.info(f"Processed actions shape: {processed_actions.shape}")
         
         return processed_actions
-        
+
     def _process_actions(self, actions):
         # Add any custom processing needed for your robot's actions
         return actions
+
+    def loss(self, transformer_outputs, actions, timestep_pad_mask, action_pad_mask, train=True):
+        logging.info(f"Action loss inputs:")
+        logging.info(f"  actions shape: {actions.shape}")
+        logging.info(f"  timestep_pad_mask shape: {timestep_pad_mask.shape}")
+        logging.info(f"  action_pad_mask shape: {action_pad_mask.shape}")
+        
+        loss, metrics = super().loss(transformer_outputs, actions, timestep_pad_mask, 
+                                   action_pad_mask, train=train)
+        logging.info(f"Action loss: {loss}")
+        logging.info(f"Action metrics: {metrics}")
+        return loss, metrics

@@ -156,6 +156,22 @@ class BlockTransformer(nn.Module):
             prefix_outputs: A list of PrefixGroup objects containing the output embeddings for each token group.
             timestep_outputs: A list of TimestepGroup objects containing the output embeddings for each token group.
         """
+        logging.info("BlockTransformer processing:")
+        logging.info("Prefix groups:")
+        for group in prefix_groups:
+            logging.info(f"  {group.name}: tokens={group.tokens.shape}, mask={group.mask.shape}")
+        
+        logging.info("Timestep groups:") 
+        for group in timestep_groups:
+            logging.info(f"  {group.name}: tokens={group.tokens.shape}, mask={group.mask.shape}")
+            
+        # Log attention patterns
+        logging.info("Attention patterns:")
+        for group in prefix_groups + timestep_groups:
+            logging.info(f"  {group.name} attends to:")
+            for rule_key, rule in group.attention_rules.items():
+                logging.info(f"    {rule_key}: {rule}")
+
         if verbose:
             self.pretty_print_attention_mask(prefix_groups, timestep_groups)
 

@@ -329,17 +329,25 @@ class NewRobotTokenizer(LowdimObsTokenizer):
     """Custom tokenizer for your robot's state"""
     
     def __call__(self, observations, tasks, train: bool = True):
-        # Extract kinematics data
+        logging.info(f"NewRobotTokenizer input shapes:")
+        for key, value in observations.items():
+            if hasattr(value, 'shape'):
+                logging.info(f"  {key}: {value.shape}")
+        
         tokenizer_inputs = []
         for key in self.obs_keys:
             if key in observations:
-                # Add any custom processing for your robot's state
                 robot_state = observations[key]
+                logging.info(f"Processing robot state with shape: {robot_state.shape}")
                 processed_state = self._process_kinematics(robot_state)
+                logging.info(f"Processed state shape: {processed_state.shape}")
                 tokenizer_inputs.append(processed_state)
-                
-        # Use parent class processing
-        return super().__call__(observations, tasks, train=train)
+        
+        result = super().__call__(observations, tasks, train=train)
+        if result is not None:
+            logging.info(f"Tokenizer output shape: {result.tokens.shape}")
+            logging.info(f"Tokenizer mask shape: {result.mask.shape}")
+        return result
         
     def _process_kinematics(self, state):
         # Add any custom processing needed for your robot's state

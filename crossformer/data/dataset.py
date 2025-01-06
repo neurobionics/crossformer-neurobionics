@@ -510,13 +510,31 @@ def make_single_dataset(
         traj_transform_kwargs: kwargs passed to 'apply_trajectory_transforms'.
         frame_transform_kwargs: kwargs passed to 'get_frame_transforms'.
     """
+    logging.info(f"Creating dataset with kwargs: {dataset_kwargs}")
+    
     dataset, dataset_statistics = make_dataset_from_rlds(
         **dataset_kwargs,
         train=train,
     )
+    logging.info(f"Dataset statistics: {dataset_statistics}")
+    
+    # Log example batch shapes before transforms
+    example_batch = next(dataset.iterator())
+    logging.info("Example batch shapes before transforms:")
+    for key, value in example_batch.items():
+        if hasattr(value, 'shape'):
+            logging.info(f"  {key}: {value.shape}")
+    
     dataset = apply_trajectory_transforms(dataset, **traj_transform_kwargs, train=train)
     dataset = apply_frame_transforms(dataset, **frame_transform_kwargs, train=train)
-
+    
+    # Log example batch shapes after transforms
+    example_batch = next(dataset.iterator())
+    logging.info("Example batch shapes after transforms:")
+    for key, value in example_batch.items():
+        if hasattr(value, 'shape'):
+            logging.info(f"  {key}: {value.shape}")
+    
     # this seems to reduce memory usage without affecting speed
     dataset = dataset.with_ram_budget(1)
 
